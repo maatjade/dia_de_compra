@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Día de Compra</title>
+<meta name="description" content="Descubre qué día comprar con tu tarjeta de crédito para tener más días para pagar, y con cuál tarjeta te conviene pagar hoy.">
+<meta name="theme-color" content="#f4f5f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1614" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Día de Compra">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta property="og:title" content="Día de Compra">
+<meta property="og:description" content="¿Qué día te conviene comprar con tu tarjeta de crédito? Compra en la ventana verde y ten casi dos meses para pagar.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: app de ciclo — anillo del ciclo arriba, tira de la semana, calendario por fases con detalle al tocar */
+:root {
+  --bg: #f4f5f3;
+  --surface: #ffffff;
+  --ink: #16211d;
+  --muted: #5f6b67;
+  --line: #dde3e0;
+  --accent: #0d6b55;
+  --accent-ink: #ffffff;
+  --ph-ideal: #12a37a;
+  --ph-ideal-soft: #c9eedf;
+  --ph-good: #8fd3b6;
+  --ph-good-soft: #e3f4ec;
+  --ph-mid: #e9c873;
+  --ph-mid-soft: #f8efd6;
+  --ph-avoid: #e2603f;
+  --ph-avoid-soft: #fbdcd2;
+  --on-strong: #ffffff;
+  --card-a: #18332b;
+  --card-b: #0d6b55;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1614; --surface: #18211e; --ink: #e7efeb; --muted: #9babA4; --line: #2b3733;
+    --accent: #4fc39f; --accent-ink: #0b1411;
+    --ph-ideal: #3cc796; --ph-ideal-soft: #173d31; --ph-good: #2f8a6e; --ph-good-soft: #1a2f28;
+    --ph-mid: #c9a54f; --ph-mid-soft: #2e2a1c; --ph-avoid: #ec7a5a; --ph-avoid-soft: #3a221b;
+    --on-strong: #0b1411; --card-a: #1d3b32; --card-b: #2a7a62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1614; --surface: #18211e; --ink: #e7efeb; --muted: #9babA4; --line: #2b3733;
+  --accent: #4fc39f; --accent-ink: #0b1411;
+  --ph-ideal: #3cc796; --ph-ideal-soft: #173d31; --ph-good: #2f8a6e; --ph-good-soft: #1a2f28;
+  --ph-mid: #c9a54f; --ph-mid-soft: #2e2a1c; --ph-avoid: #ec7a5a; --ph-avoid-soft: #3a221b;
+  --on-strong: #0b1411; --card-a: #1d3b32; --card-b: #2a7a62;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; min-height: 100vh; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px)); padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.wrap > * { min-width: 0; }
+html, body { overflow-x: hidden; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(24px, 6.5vw, 32px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+h2 { font-size: 17px; font-weight: 700; }
+.lede { color: var(--muted); margin: 6px 0 0; }
+.label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 600; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.example-tag { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; background: var(--ph-mid-soft); color: var(--ink); padding: 2px 8px; border-radius: 99px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Tarjetas */
+.cards { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; }
+.ccard { flex: 0 0 min(180px, 62vw); aspect-ratio: 1.586; max-width: 100%; border-radius: 12px; padding: 12px; color: #f2f7f5; background: linear-gradient(135deg, var(--card-a), var(--card-b)); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; border: 2px solid transparent; scroll-snap-align: start; text-align: left; position: relative; opacity: .65; }
+.ccard[aria-pressed="true"] { opacity: 1; border-color: var(--ink); }
+.ccard .chip { width: 26px; height: 19px; border-radius: 4px; background: linear-gradient(135deg, #e7cf8a, #b8994a); }
+.ccard .cname { font-family: var(--font-display); font-weight: 700; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ccard .cmeta { font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; opacity: .85; display: flex; gap: 10px; }
+.ccard .edit { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.28); color: #fff; border: 0; border-radius: 99px; width: 26px; height: 26px; cursor: pointer; font-size: 13px; }
+.ccard .example-tag { position: absolute; top: 9px; right: 9px; }
+.ccard.add { background: transparent; border: 2px dashed var(--line); color: var(--muted); align-items: center; justify-content: center; font-weight: 600; opacity: 1; }
+
+/* Formulario */
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; }
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fields .f-name { grid-column: 1 / -1; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field input { font: inherit; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { font-weight: 600; padding: 10px 16px; border-radius: 99px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.error { color: var(--ph-avoid); font-size: 13px; margin: 0; }
+
+/* Anillo del ciclo */
+.hero { background: var(--surface); border-radius: 24px; padding: 20px 16px; display: grid; justify-items: center; gap: 14px; border: 1px solid var(--line); }
+.ring-wrap { position: relative; width: min(280px, 100%); aspect-ratio: 1; }
+.ring-wrap svg { width: 100%; height: 100%; display: block; }
+.ring-center { position: absolute; inset: 18%; border-radius: 50%; display: grid; place-content: center; text-align: center; gap: 2px; padding: 8px; }
+.ring-center .rc-top { font-size: 12px; color: var(--muted); font-weight: 600; }
+.ring-center .rc-phase { font-family: var(--font-display); font-weight: 800; font-size: clamp(18px, 6vw, 28px); line-height: 1.05; letter-spacing: -0.02em; }
+.ring-center .rc-sub { font-size: 13px; color: var(--muted); }
+.ring-center .rc-days { font-family: var(--font-mono); font-weight: 700; font-size: 15px; }
+.cta { display: grid; gap: 4px; text-align: center; max-width: 34ch; }
+.cta strong { font-family: var(--font-display); font-size: 18px; line-height: 1.25; text-wrap: balance; }
+.cta span { color: var(--muted); font-size: 14px; }
+
+/* Leyenda de fases */
+.phases { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; }
+.phase { display: grid; gap: 4px; justify-items: center; text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; line-height: 1.2; }
+.phase i { width: 100%; height: 6px; border-radius: 99px; display: block; }
+
+/* Tira semanal */
+.strip { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 6px; scroll-snap-type: x proximity; }
+.sday { flex: 0 0 52px; display: grid; justify-items: center; gap: 4px; padding: 8px 0; border-radius: 16px; border: 0; background: transparent; cursor: pointer; scroll-snap-align: start; }
+.sday .wd { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.sday .dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.sday .dd { font-family: var(--font-mono); font-size: 10px; color: var(--muted); }
+.sday[aria-pressed="true"] { background: var(--surface); box-shadow: 0 0 0 1px var(--line); }
+
+/* Fases aplicadas a puntos */
+.p-ideal { background: var(--ph-ideal); color: var(--on-strong); }
+.p-good { background: var(--ph-good); color: var(--ink); }
+.p-mid { background: var(--ph-mid-soft); color: var(--ink); }
+.p-avoid { background: var(--ph-avoid); color: var(--on-strong); }
+
+/* Calendario */
+.cal { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 14px 8px; display: grid; gap: 10px; }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; padding-inline: 4px; }
+.cal-nav h2::first-letter { text-transform: uppercase; }
+.navbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: 16px; }
+.navbtn:disabled { opacity: .3; cursor: default; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 6px; }
+.dow { font-size: 11px; text-align: center; color: var(--muted); font-weight: 600; text-transform: uppercase; padding-bottom: 4px; }
+.cell { position: relative; height: 46px; display: grid; place-items: center; min-width: 0; }
+.cell .band { position: absolute; inset: 5px 0; }
+.cell.b-ideal .band { background: var(--ph-ideal-soft); }
+.cell.b-avoid .band { background: var(--ph-avoid-soft); }
+.cell.b-start .band { left: 4px; border-top-left-radius: 99px; border-bottom-left-radius: 99px; }
+.cell.b-end .band { right: 4px; border-top-right-radius: 99px; border-bottom-right-radius: 99px; }
+.cday { position: relative; width: min(36px, 100%); aspect-ratio: 1; height: auto; border-radius: 50%; border: 0; background: transparent; cursor: pointer; font-weight: 600; font-size: 14px; display: grid; place-items: center; }
+.cday.p-mid { background: transparent; }
+.cday.p-ideal { background: var(--ph-ideal); color: var(--on-strong); }
+.cday.p-avoid { background: var(--ph-avoid); color: var(--on-strong); }
+.cday.p-good { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ph-good); }
+.cday.past { color: var(--line); cursor: default; background: transparent !important; box-shadow: none !important; }
+.cday.today { box-shadow: inset 0 0 0 3px var(--ink); font-weight: 800; }
+.cday[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
+.cday .mk { position: absolute; bottom: -6px; font-size: 8px; font-weight: 700; letter-spacing: .04em; color: var(--muted); line-height: 1; }
+.key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); padding-inline: 4px; }
+.key span { display: inline-flex; align-items: center; gap: 6px; }
+.key b { font-size: 9px; letter-spacing: .04em; color: var(--ink); }
+
+/* Detalle del día */
+/* ¿Con cuál pago? */
+.best { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 12px; }
+.best-win { display: grid; gap: 2px; }
+.best-win .bw-name { font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 6.5vw, 28px); line-height: 1.1; letter-spacing: -0.01em; color: var(--ph-ideal); overflow-wrap: anywhere; }
+.best-win .bw-sub { color: var(--muted); font-size: 14px; }
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.rank button { width: 100%; display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; text-align: left; }
+.rank li:first-child button { border-color: var(--ph-ideal); background: var(--ph-ideal-soft); }
+.rank .pos { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 800; background: var(--line); color: var(--ink); }
+.rank li:first-child .pos { background: var(--ph-ideal); color: var(--on-strong); }
+.rank .rn { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank .rp { font-size: 12px; color: var(--muted); }
+.rank .rd { text-align: right; }
+.rank .rd b { font-family: var(--font-mono); font-size: 20px; display: block; line-height: 1; }
+.rank .rd span { font-size: 11px; color: var(--muted); }
+.best .hint-add { font-size: 13px; color: var(--muted); margin: 0; }
+.detail { border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; }
+.detail.d-ideal { background: var(--ph-ideal-soft); }
+.detail.d-good { background: var(--ph-good-soft); }
+.detail.d-mid { background: var(--ph-mid-soft); }
+.detail.d-avoid { background: var(--ph-avoid-soft); }
+.detail .d-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.detail .d-date { font-family: var(--font-display); font-weight: 700; font-size: 17px; }
+.detail .d-date::first-letter { text-transform: uppercase; }
+.detail .d-tag { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+.detail .d-body { display: flex; gap: 18px; flex-wrap: wrap; align-items: baseline; }
+.detail .d-big { font-family: var(--font-mono); font-size: 30px; font-weight: 700; line-height: 1; }
+.detail p { margin: 0; font-size: 14px; }
+
+.explain { color: var(--muted); font-size: 14px; display: grid; gap: 8px; }
+.explain p { margin: 0; }
+.status { font-size: 12px; color: var(--muted); }
+.foot { border-top: 1px solid var(--line); padding-top: 18px; display: grid; gap: 10px; font-size: 13px; color: var(--muted); }
+.foot p { margin: 0; }
+.foot strong { color: var(--ink); }
+.row { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: no-preference) {
+  .cday, .sday, .ccard { transition: background-color .2s, opacity .2s, border-color .2s; }
+  #ring-marker { transition: transform .5s ease; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1>¿Qué día te conviene comprar?</h1>
+    <p class="lede">Tu tarjeta tiene un ciclo, como un calendario. Compra en la ventana verde y tendrás casi dos meses para pagar.</p>
+  </header>
+
+  <section aria-labelledby="mis-tarjetas">
+    <div class="row" style="margin-bottom:10px">
+      <h2 id="mis-tarjetas">Mis tarjetas</h2>
+      <span class="status" id="status"></span>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <form id="form" hidden>
+    <h2 id="form-title">Agregar tarjeta</h2>
+    <div class="fields">
+      <div class="field f-name">
+        <label class="label" for="f-name">Nombre</label>
+        <input id="f-name" maxlength="28" placeholder="Visa Qore Oro BCP" required>
+      </div>
+      <div class="field">
+        <label class="label" for="f-cut">Día de corte</label>
+        <input id="f-cut" type="number" inputmode="numeric" min="1" max="31" placeholder="25" required>
+      </div>
+      <div class="field">
+        <label class="label" for="f-pay">Día de pago</label>
+        <input id="f-pay" type="number" inputmode="numeric" min="1" max="31" placeholder="20" required>
+      </div>
+    </div>
+    <p class="hint">Están en tu estado de cuenta como "fecha de cierre" y "último día de pago". Solo se guardan el nombre y los días, nunca el número de la tarjeta.</p>
+    <p class="error" id="form-error" hidden></p>
+    <div class="actions">
+      <button class="btn" type="submit">Guardar tarjeta</button>
+      <button class="btn ghost" type="button" id="f-cancel">Cancelar</button>
+    </div>
+  </form>
+
+  <section class="best" aria-labelledby="best-title" aria-live="polite">
+    <h2 id="best-title">¿Con cuál pago hoy?</h2>
+    <div class="best-win" id="best-win"></div>
+    <ol class="rank" id="rank"></ol>
+    <p class="hint-add" id="best-hint" hidden></p>
+  </section>
+
+  <section class="hero" aria-live="polite">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 200 200" id="ring" role="img" aria-label="Ciclo de facturación"></svg>
+      <div class="ring-center" id="ring-center"></div>
+    </div>
+    <div class="cta" id="cta"></div>
+    <div class="phases" aria-label="Fases del ciclo">
+      <div class="phase"><i class="p-ideal"></i>Ventana ideal</div>
+      <div class="phase"><i class="p-good"></i>Buen momento</div>
+      <div class="phase"><i style="background:var(--ph-mid)"></i>Regular</div>
+      <div class="phase"><i class="p-avoid"></i>Evita</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="proximos">
+    <h2 id="proximos" style="margin-bottom:8px">Próximos días</h2>
+    <div class="strip" id="strip"></div>
+  </section>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+
+  <section class="cal" aria-labelledby="cal-title">
+    <div class="cal-nav">
+      <button class="navbtn" id="prev" type="button" aria-label="Mes anterior">‹</button>
+      <h2 id="cal-title"></h2>
+      <button class="navbtn" id="next" type="button" aria-label="Mes siguiente">›</button>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="key">
+      <span><b>CORTE</b> cierra el ciclo</span>
+      <span><b>PAGO</b> último día de pago</span>
+      <span><i style="width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--ink);display:inline-block"></i> Hoy</span>
+      <span>Toca un día para ver cuándo lo pagas</span>
+    </div>
+  </section>
+
+  <section class="explain" aria-labelledby="como">
+    <h2 id="como" style="color:var(--ink)">Cómo funciona</h2>
+    <p>Todo lo que compras hasta el día de corte entra en ese estado de cuenta. Si compras el día siguiente al corte, la compra pasa al próximo ciclo y ganas casi un mes extra para pagar.</p>
+    <p>Por eso la ventana ideal empieza justo después del corte, y los días previos al corte son los peores. Si tu banco pasa las compras del día de corte al ciclo siguiente, ese día también te conviene.</p>
+    <p>Aplica a compras en una sola cuota. Las compras en cuotas y los avances en efectivo generan intereses desde el inicio.</p>
+  </section>
+
+  <footer class="foot">
+    <p><strong>Tus datos se quedan contigo.</strong> Las tarjetas se guardan solo en este teléfono o computadora, dentro de tu navegador. No se envían a ningún servidor y nadie más puede verlas. Si borras los datos del navegador o cambias de equipo, tendrás que volver a agregarlas.</p>
+    <p><strong>Tenla a un toque.</strong> En iPhone, ábrela en Safari, toca Compartir y elige "Agregar a pantalla de inicio". En Android, abre el menú de Chrome y elige "Agregar a la pantalla principal".</p>
+    <p>Los cálculos son referenciales y asumen compras en una sola cuota. Confirma tus fechas en el estado de cuenta de tu banco. No es asesoría financiera.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const EXAMPLE = [{ id: "ejemplo", name: "Ejemplo A", cut: 25, pay: 20, example: true }, { id: "ejemplo-b", name: "Ejemplo B", cut: 10, pay: 5, example: true }];
+  const LS_KEY = "dia-compra-cards";
+  const DAY = 86400000;
+  const fmtWd = new Intl.DateTimeFormat("es-PE", { weekday: "short" });
+  const fmtWdLong = new Intl.DateTimeFormat("es-PE", { weekday: "long" });
+  const fmtLong = new Intl.DateTimeFormat("es-PE", { weekday: "long", day: "numeric", month: "long" });
+  const fmtShort = new Intl.DateTimeFormat("es-PE", { day: "numeric", month: "short" });
+  const fmtMonth = new Intl.DateTimeFormat("es-PE", { month: "long", year: "numeric" });
+  const PHASES = {
+    ideal: { name: "Ventana ideal", tag: "Compra aquí", color: "var(--ph-ideal)", cls: "p-ideal" },
+    good: { name: "Buen momento", tag: "Buen día", color: "var(--ph-good)", cls: "p-good" },
+    mid: { name: "Regular", tag: "Puedes esperar", color: "var(--ph-mid)", cls: "p-mid" },
+    avoid: { name: "Evita comprar", tag: "Evita", color: "var(--ph-avoid)", cls: "p-avoid" }
+  };
+
+  let cards = [], selected = null, editingId = null;
+  const today = startOfDay(new Date());
+  let picked = today;
+  let viewMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const $ = (id) => document.getElementById(id);
+
+  // ---------- Cálculo ----------
+  function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function addDays(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+  function clampDate(y, m, d) { const last = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d, last)); }
+  function cutFor(date, C) {
+    const c = clampDate(date.getFullYear(), date.getMonth(), C);
+    return date <= c ? c : clampDate(date.getFullYear(), date.getMonth() + 1, C);
+  }
+  function prevCut(nextCut, C) { return clampDate(nextCut.getFullYear(), nextCut.getMonth() - 1, C); }
+  function payFor(cut, C, P) {
+    return P > C ? clampDate(cut.getFullYear(), cut.getMonth(), P) : clampDate(cut.getFullYear(), cut.getMonth() + 1, P);
+  }
+  function analyze(date, card) {
+    const cut = cutFor(date, card.cut);
+    const pay = payFor(cut, card.cut, card.pay);
+    const start = addDays(prevCut(cut, card.cut), 1);
+    const len = Math.round((cut - start) / DAY) + 1;
+    const pos = Math.round((date - start) / DAY) + 1; // 1 = día siguiente al corte
+    let phase;
+    if (pos <= 7) phase = "ideal";
+    else if (pos <= Math.round(len * 0.55)) phase = "good";
+    else if (pos > len - 5) phase = "avoid";
+    else phase = "mid";
+    return { cut, pay, start, len, pos, phase, days: Math.round((pay - date) / DAY) };
+  }
+
+  // ---------- Utilidades ----------
+  function esc(s) { const t = document.createElement("span"); t.textContent = s; return t.innerHTML; }
+  function sameDay(a, b) { return a.getTime() === b.getTime(); }
+  function currentCard() { const list = cards.length ? cards : EXAMPLE; return list.find((c) => c.id === selected) || list[0]; }
+
+  // ---------- Tarjetas ----------
+  function renderCards() {
+    const list = cards.length ? cards : EXAMPLE;
+    if (!list.find((c) => c.id === selected)) selected = list[0].id;
+    const box = $("cards");
+    box.innerHTML = "";
+    list.forEach((c) => {
+      const b = document.createElement("div");
+      b.className = "ccard"; b.setAttribute("role", "button"); b.tabIndex = 0;
+      b.setAttribute("aria-pressed", String(c.id === selected));
+      b.innerHTML = `<div class="chip"></div><div><div class="cname">${esc(c.name)}</div>
+        <div class="cmeta"><span>CORTE ${String(c.cut).padStart(2, "0")}</span><span>PAGO ${String(c.pay).padStart(2, "0")}</span></div></div>`;
+      if (c.example) {
+        const t = document.createElement("span"); t.className = "example-tag"; t.textContent = "Ejemplo"; b.appendChild(t);
+      } else {
+        const e = document.createElement("button"); e.className = "edit"; e.type = "button";
+        e.setAttribute("aria-label", "Editar " + c.name); e.textContent = "✎";
+        e.addEventListener("click", (ev) => { ev.stopPropagation(); openForm(c); });
+        b.appendChild(e);
+      }
+      const pick = () => { selected = c.id; renderAll(); };
+      b.addEventListener("click", pick);
+      b.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(); } });
+      box.appendChild(b);
+    });
+    const add = document.createElement("button");
+    add.type = "button"; add.className = "ccard add";
+    add.textContent = cards.length ? "+ Otra tarjeta" : "+ Agregar mi tarjeta";
+    add.addEventListener("click", () => openForm(null));
+    box.appendChild(add);
+  }
+
+  // ---------- Anillo ----------
+  function arcPath(cx, cy, r, a0, a1) {
+    const p = (a) => [cx + r * Math.sin(a), cy - r * Math.cos(a)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    const large = a1 - a0 > Math.PI ? 1 : 0;
+    return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+  }
+  function renderRing() {
+    const card = currentCard();
+    const a = analyze(today, card);
+    const svg = $("ring");
+    const R = 84, gap = 0.01;
+    let parts = "";
+    // un segmento por día del ciclo, coloreado por fase
+    for (let i = 1; i <= a.len; i++) {
+      const d = addDays(today, i - 1); // el anillo muestra los próximos días, empezando por hoy arriba
+      const ph = analyze(d, card).phase;
+      const a0 = ((i - 1) / a.len) * 2 * Math.PI + gap;
+      const a1 = (i / a.len) * 2 * Math.PI - gap;
+      const past = false;
+      parts += `<path d="${arcPath(100, 100, R, a0, a1)}" stroke="${PHASES[ph].color}" stroke-width="18" fill="none" opacity="${past ? 0.3 : 1}"/>`;
+      const mid = ((i - 0.5) / a.len) * 2 * Math.PI;
+      const tx = 100 + R * Math.sin(mid), ty = 100 - R * Math.cos(mid);
+      const strong = ph === "ideal" || ph === "avoid";
+      parts += `<text x="${tx.toFixed(2)}" y="${ty.toFixed(2)}" text-anchor="middle" dominant-baseline="central" font-size="${d.getDate() > 9 ? 7 : 7.5}" font-weight="700" font-family="var(--font-body)" fill="${strong ? "var(--on-strong)" : "var(--ink)"}" opacity="${past ? 0.45 : 1}">${d.getDate()}</text>`;
+    }
+    const ma = (0.5 / a.len) * 2 * Math.PI;
+    const mx = 100 + R * Math.sin(ma), my = 100 - R * Math.cos(ma);
+    parts += `<circle cx="${mx.toFixed(2)}" cy="${my.toFixed(2)}" r="13" fill="var(--surface)" stroke="var(--ink)" stroke-width="3"/>
+      <text x="${mx.toFixed(2)}" y="${my.toFixed(2)}" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="800" font-family="var(--font-body)" fill="var(--ink)">${today.getDate()}</text>`;
+    svg.innerHTML = parts;
+    svg.setAttribute("aria-label", `Próximos ${a.len} días desde hoy, coloreados por fase. Hoy: ${PHASES[a.phase].name}`);
+
+    $("ring-center").innerHTML = `
+      ${card.example ? '<div><span class="example-tag">Ejemplo</span></div>' : ""}
+      <div class="rc-top">Hoy · día ${a.pos} de ${a.len}</div>
+      <div class="rc-phase" style="color:${PHASES[a.phase].color}">${PHASES[a.phase].name}</div>
+      <div class="rc-sub">Si compras hoy pagas en</div>
+      <div class="rc-days">${a.days} días</div>`;
+
+    // siguiente ventana ideal
+    let cta;
+    if (a.phase === "ideal") {
+      const end = addDays(a.start, 6);
+      cta = `<strong>Estás en tu mejor momento para comprar.</strong><span>La ventana ideal dura hasta el ${fmtLong.format(end)}. Lo que compres hoy lo pagas el ${fmtLong.format(a.pay)}.</span>`;
+    } else {
+      const next = addDays(a.cut, 1);
+      const na = analyze(next, card);
+      const wait = Math.round((next - today) / DAY);
+      cta = `<strong>Tu ventana ideal empieza el ${fmtWdLong.format(next)} ${next.getDate()}</strong><span>Faltan ${wait} ${wait === 1 ? "día" : "días"}. Si esperas, pagarás el ${fmtLong.format(na.pay)}: ${na.days} días para pagar.</span>`;
+    }
+    $("cta").innerHTML = cta;
+  }
+
+  // ---------- Tira de próximos días ----------
+  function renderStrip() {
+    const card = currentCard();
+    const box = $("strip");
+    box.innerHTML = "";
+    for (let i = 0; i < 21; i++) {
+      const d = addDays(today, i);
+      const a = analyze(d, card);
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "sday";
+      b.setAttribute("aria-pressed", String(sameDay(d, picked)));
+      b.setAttribute("aria-label", `${fmtLong.format(d)}: ${PHASES[a.phase].name}, ${a.days} días para pagar`);
+      b.innerHTML = `<span class="wd">${i === 0 ? "Hoy" : fmtWd.format(d).replace(".", "")}</span>
+        <span class="dot ${PHASES[a.phase].cls}">${d.getDate()}</span><span class="dd">${a.days}d</span>`;
+      b.addEventListener("click", () => selectDay(d));
+      box.appendChild(b);
+    }
+  }
+
+  // ---------- Detalle ----------
+  function renderDetail() {
+    const card = currentCard();
+    const a = analyze(picked, card);
+    const ph = PHASES[a.phase];
+    const el = $("detail");
+    el.className = "detail d-" + a.phase;
+    let note;
+    if (a.phase === "ideal") note = "Es de los mejores días del ciclo. La compra entra en el próximo estado de cuenta.";
+    else if (a.phase === "good") note = "Todavía tienes bastante margen para pagar.";
+    else if (a.phase === "mid") note = `Si puedes esperar al ${fmtShort.format(addDays(a.cut, 1))}, ganas casi un mes más.`;
+    else note = sameDay(picked, a.cut)
+      ? "Es el día de corte: la compra entra en el estado de cuenta que cierra hoy."
+      : `El corte es el ${fmtLong.format(a.cut)}. Espera al día siguiente y tendrás casi un mes más.`;
+    el.innerHTML = `
+      <div class="d-head"><span class="d-date">${sameDay(picked, today) ? "Hoy, " + fmtLong.format(picked) : fmtLong.format(picked)}</span>
+        <span class="d-tag ${ph.cls}">${ph.tag}</span></div>
+      <div class="d-body"><span class="d-big">${a.days}</span><span>días para pagar · pagas el <strong>${fmtLong.format(a.pay)}</strong></span></div>
+      <p>${note}</p>`;
+  }
+
+  // ---------- Calendario ----------
+  function renderCalendar() {
+    const card = currentCard();
+    const y = viewMonth.getFullYear(), m = viewMonth.getMonth();
+    $("cal-title").textContent = fmtMonth.format(viewMonth);
+    $("prev").disabled = (y === today.getFullYear() && m === today.getMonth());
+    const grid = $("grid");
+    let html = ["lu", "ma", "mi", "ju", "vi", "sá", "do"].map((d) => `<div class="dow">${d}</div>`).join("");
+    const offset = (new Date(y, m, 1).getDay() + 6) % 7;
+    for (let i = 0; i < offset; i++) html += `<div class="cell"></div>`;
+    const daysIn = new Date(y, m + 1, 0).getDate();
+    const cutDay = clampDate(y, m, card.cut).getDate();
+    const payDay = clampDate(y, m, card.pay).getDate();
+    for (let d = 1; d <= daysIn; d++) {
+      const date = new Date(y, m, d);
+      const past = date < today;
+      const a = analyze(date, card);
+      const cls = ["cell"];
+      // banda continua para ventana ideal y días a evitar
+      if (!past && (a.phase === "ideal" || a.phase === "avoid")) {
+        cls.push("b-" + a.phase);
+        const col = (offset + d - 1) % 7;
+        const prev = addDays(date, -1), nxt = addDays(date, 1);
+        const prevSame = col !== 0 && d > 1 && prev >= today && analyze(prev, card).phase === a.phase;
+        const nextSame = col !== 6 && d < daysIn && analyze(nxt, card).phase === a.phase;
+        if (!prevSame) cls.push("b-start");
+        if (!nextSame) cls.push("b-end");
+      }
+      const bcls = ["cday"];
+      if (past) bcls.push("past"); else bcls.push(PHASES[a.phase].cls);
+      if (sameDay(date, today)) bcls.push("today");
+      let mk = "";
+      if (d === cutDay) mk = `<span class="mk">CORTE</span>`;
+      else if (d === payDay) mk = `<span class="mk">PAGO</span>`;
+      const label = `${fmtLong.format(date)}${past ? "" : `: ${PHASES[a.phase].name}, ${a.days} días para pagar`}`;
+      html += `<div class="${cls.join(" ")}"><span class="band"></span><button type="button" class="${bcls.join(" ")}" data-d="${d}" aria-label="${label}" aria-pressed="${sameDay(date, picked)}" ${past ? "disabled" : ""}>${d}${mk}</button></div>`;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll("button[data-d]").forEach((b) => {
+      b.addEventListener("click", () => selectDay(new Date(y, m, Number(b.dataset.d))));
+    });
+  }
+  $("prev").addEventListener("click", () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() - 1, 1); renderCalendar(); });
+  $("next").addEventListener("click", () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth() + 1, 1); renderCalendar(); });
+
+  function selectDay(d) {
+    picked = d;
+    if (d.getMonth() !== viewMonth.getMonth() || d.getFullYear() !== viewMonth.getFullYear()) viewMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+    renderBest(); renderStrip(); renderDetail(); renderCalendar();
+  }
+
+  // ---------- ¿Con cuál pago? ----------
+  function renderBest() {
+    const list = cards.length ? cards : EXAMPLE;
+    const isToday = sameDay(picked, today);
+    $("best-title").textContent = isToday ? "¿Con cuál pago hoy?" : `¿Con cuál pago el ${fmtShort.format(picked)}?`;
+    const ranked = list.map((c) => ({ c, a: analyze(picked, c) })).sort((x, y) => y.a.days - x.a.days);
+    const w = ranked[0];
+    if (ranked.length > 1) {
+      const diff = w.a.days - ranked[1].a.days;
+      const tag = w.c.example ? '<div><span class="example-tag">Ejemplo</span></div>' : "";
+      if (diff > 0) {
+        $("best-win").innerHTML = `${tag}<span class="bw-name">Usa ${esc(w.c.name)}</span>
+          <span class="bw-sub">Pagas el ${fmtLong.format(w.a.pay)}: ${w.a.days} días, ${diff} más que con ${esc(ranked[1].c.name)}.</span>`;
+      } else {
+        const tied = ranked.filter((r) => r.a.days === w.a.days).map((r) => esc(r.c.name));
+        const names = tied.length === 2 ? `${tied[0]} o ${tied[1]}` : tied.slice(0, -1).join(", ") + " o " + tied[tied.length - 1];
+        $("best-win").innerHTML = `${tag}<span class="bw-name">Da igual: ${names}</span>
+          <span class="bw-sub">Con ${tied.length === 2 ? "ambas" : "cualquiera de ellas"} pagas el ${fmtLong.format(w.a.pay)}: ${w.a.days} días para pagar.</span>`;
+      }
+    } else {
+      $("best-win").innerHTML = `<span class="bw-name">Usa ${esc(w.c.name)}</span>
+        <span class="bw-sub">Pagas el ${fmtLong.format(w.a.pay)}: ${w.a.days} días para pagar.</span>`;
+    }
+    const ol = $("rank");
+    ol.innerHTML = "";
+    ranked.forEach(({ c, a }, i) => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", `${c.name}: ${a.days} días, pagas el ${fmtLong.format(a.pay)}. Ver su ciclo`);
+      b.innerHTML = `<span class="pos">${i + 1}</span>
+        <span style="min-width:0"><span class="rn" style="display:block">${esc(c.name)}</span><span class="rp">${PHASES[a.phase].name} · pagas el ${fmtShort.format(a.pay)}</span></span>
+        <span class="rd"><b>${a.days}</b><span>días</span></span>`;
+      b.addEventListener("click", () => { selected = c.id; renderAll(); });
+      li.appendChild(b); ol.appendChild(li);
+    });
+    const hint = $("best-hint");
+    if (cards.length === 1) { hint.textContent = "Agrega otra tarjeta para compararlas y saber con cuál te conviene pagar cada día."; hint.hidden = false; }
+    else if (!cards.length) { hint.textContent = "Son tarjetas de ejemplo. Agrega las tuyas para ver tu propia comparación."; hint.hidden = false; }
+    else hint.hidden = true;
+  }
+
+  function renderAll() { renderCards(); renderBest(); renderRing(); renderStrip(); renderDetail(); renderCalendar(); }
+
+  // ---------- Formulario ----------
+  function openForm(card) {
+    editingId = card ? card.id : null;
+    $("form-title").textContent = card ? "Editar tarjeta" : "Agregar tarjeta";
+    $("f-name").value = card ? card.name : "";
+    $("f-cut").value = card ? card.cut : "";
+    $("f-pay").value = card ? card.pay : "";
+    $("f-cancel").textContent = card ? "Eliminar tarjeta" : "Cancelar";
+    $("f-cancel").dataset.mode = card ? "delete" : "cancel";
+    $("form-error").hidden = true;
+    $("form").hidden = false;
+    $("f-name").focus();
+  }
+  function closeForm() { $("form").hidden = true; editingId = null; }
+  $("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = $("f-name").value.trim();
+    const cut = parseInt($("f-cut").value, 10), pay = parseInt($("f-pay").value, 10);
+    const err = $("form-error");
+    const fail = (t) => { err.textContent = t; err.hidden = false; };
+    if (!name) return fail("Ponle un nombre a la tarjeta, por ejemplo el banco.");
+    if (!(cut >= 1 && cut <= 31) || !(pay >= 1 && pay <= 31)) return fail("Los días deben ser números del 1 al 31.");
+    if (cut === pay) return fail("El día de corte y el de pago no pueden ser el mismo.");
+    const id = editingId || ("c" + Date.now().toString(36));
+    const card = { id, name, cut, pay };
+    const i = cards.findIndex((c) => c.id === id);
+    if (i >= 0) cards[i] = card; else cards.push(card);
+    selected = id;
+    closeForm(); renderAll();
+    await persist();
+  });
+  $("f-cancel").addEventListener("click", async () => {
+    if ($("f-cancel").dataset.mode === "delete" && editingId) {
+      const id = editingId;
+      cards = cards.filter((c) => c.id !== id);
+      closeForm(); renderAll();
+      await remove();
+    } else closeForm();
+  });
+
+  // ---------- Guardado (solo en este dispositivo) ----------
+  let storageOk = true;
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(cards)); storageOk = true; }
+    catch (e) { storageOk = false; }
+  }
+  function loadLocal() {
+    try {
+      const v = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+      return Array.isArray(v) ? v.filter((c) => c && c.id && c.cut >= 1 && c.cut <= 31 && c.pay >= 1 && c.pay <= 31).map((c) => ({ id: String(c.id), name: String(c.name || "Tarjeta").slice(0, 28), cut: Number(c.cut), pay: Number(c.pay) })) : [];
+    } catch (e) { storageOk = false; return []; }
+  }
+  function setStatus(t) { $("status").textContent = t; }
+  function updateStatus() {
+    if (!storageOk) setStatus("No se pudo guardar: tu navegador está en modo privado o bloquea el almacenamiento");
+    else setStatus(cards.length ? "Guardado en este dispositivo" : "");
+  }
+  async function persist() { saveLocal(); updateStatus(); }
+  async function remove() { saveLocal(); updateStatus(); }
+
+  cards = loadLocal();
+  renderAll();
+  updateStatus();
+
+  // al volver a la app (por ejemplo, desde la pantalla de inicio al día siguiente), recalcula "hoy"
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    const now = startOfDay(new Date());
+    if (now.getTime() !== today.getTime()) location.reload();
+  });
+})();
+</script>
+</body>
+</html>
